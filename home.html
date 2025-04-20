@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>שליטה בזמן אמת והרצת פרוייקט שמורים</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
+    
+    <style>
+        #userEmail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        body {
+            background-image: url('https://i.pinimg.com/736x/ae/fa/62/aefa62f6195eedad06ccaf7d083e3f71.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 0%;
+        }
+        .navbar { /* עיצוב לתפריט ניווט*/
+            margin-bottom: 0px; /* הורדת שוליים בתחתית התפריט*/
+        }
+        #audio-file-input {
+            opacity: 0;
+            position: fixed;
+            width: 0;
+            height: 0;
+        }
+        #file-label {
+            background-color: #fff;
+            border: 0 solid #e2e8f0;
+            border-radius: 1.5rem;
+            box-sizing: border-box;
+            color: #0d172a;
+            cursor: pointer;
+            display: block;
+            font-family: "Basier circle", -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1;
+            margin-bottom: 1rem;
+            padding: 1rem 1.6rem;
+            text-align: center;
+            text-decoration: none #0d172a solid;
+            transition: all .1s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0px 1px 2px rgba(166, 175, 195, 0.25);
+            touch-action: manipulation;
+        }
+        #file-label:hover {
+            background-color: #1e293b;
+            color: #fff;
+        }
+        button {
+            background-color: #fff;
+            border: 0 solid #e2e8f0;
+            border-radius: 1.5rem;
+            box-sizing: border-box;
+            color: #0d172a;
+            cursor: pointer;
+            display: block;
+            font-family: "Basier circle", -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1;
+            margin-bottom: 1rem;
+            padding: 1rem 1.6rem;
+            text-align: center;
+            text-decoration: none #0d172a solid;
+            transition: all .1s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0px 1px 2px rgba(166, 175, 195, 0.25);
+            touch-action: manipulation;
+        }
+        button:hover {
+            background-color: #1e293b;
+            color: #fff;
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h4 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        .control-button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            background: #007bff;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .control-button:hover {
+            background: #0056b3;
+        }
+        .control-button.active {
+            background: #004085;
+            box-shadow: 0 0 5px rgba(0, 64, 133, 0.5);
+        }
+        #rx-display-block {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 20px auto;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        .display {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        .control-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        #waveform {
+            margin: 20px 0;
+            min-height: 100px;
+            width: 100%;
+            max-width: 100%;
+            background: transparent;
+        }
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .audio-player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin: 20px auto;
+        }
+        
+        @media (min-width: 768px) {
+            button {
+                font-size: 1.125rem;
+                padding: 1rem 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .control-group {
+                width: 100%;
+            }
+            #controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (min-width: 768px) {
+            button {
+                font-size: 1.125rem;
+                padding: 1rem 2rem;
+            }
+            #controls {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+                width: 100%;
+            }
+            .control-group {
+                width: 100%;
+            }
+            .control-group h4 {
+                text-align: center;
+            }
+            .control-group .control-button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .control-group {
+                width: 100%;
+            }
+            #controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Ensure full width containers */
+        .container, .container-fluid {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 15px;
+        }
+        
+        #controls {
+            width: 100%;
+            padding: 0 15px;
+        }
+        
+        .control-panel {
+            width: 100%;
+        }
+        
+        .audio-player-container {
+            width: 100%;
+            padding: 0 15px;
+        }
+        
+        #rx-display-block {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 15px;
+        }
+    </style>
+</head>
+<body>
+
+     
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light"> <!-- תפריט ניווט עליון מספריית Bootstrap -->
+        <div class="container-fluid"> <!-- הגדרת מכולה בגודל מלא לעמוד-->
+            <a class="navbar-brand" href="/APPHTML/home.html"> control</a> <!-- שם הדף שהמשתמש נמצא בו בתפריט הניווט-->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <!-- התאמת כפתור התפריט למסכים קטנים-->
+                <span class="navbar-toggler-icon"></span> <!-- אייקונים לתפריט-->
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav"> <!-- הגדרת קיווץ התפריט למסכים קטנים-->
+                <ul class="navbar-nav me-auto"> <!-- הגדרת תפריט הניווט לצד ימין כאשר הוא מוצג במסך קטן -->
+
+                    <li class="nav-item"> <!-- הוספת אייטם לתפריט-->
+                        <a class="nav-link" href="/APPHTML/aboutus.html">about us</a> <!-- קישור לדף אודות בתפריט-->
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto"> <!-- צימוד תפריט הניווט לשמאל-->
+                    <li class="nav-item"> <!-- הוספת פריט בשורת התפריט-->
+                        <button id="userEmail" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#logoutModal">Loading...</button> <!-- כפתור שמציג את המייל המחובר ובלחיצה עליו פותח חלון התנתקות-->
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+   
+    <!-- חלון התנתקות (מודל) -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true"> <!-- חלון קופץ עם אנימציית fade -->
+        <div class="modal-dialog"> <!-- מסגרת לחלון-->
+            <div class="modal-content"> <!-- תוכן החלון-->
+                <div class="modal-header"> <!-- כותרת החלון-->
+                    <h5 class="modal-title" id="logoutModalLabel">Logout</h5> <!-- כותרת המודל -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- כפתור סגירה -->
+                </div>
+                <div class="modal-body"> <!-- גוף המודל -->
+                    Are you sure you want to log out? <!-- שאלה עבור המשתמש-->
+                </div>
+                <div class="modal-footer"> <!-- תחתית המודל -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <!-- כפתור לביטול ההתנתקות-->
+                    <button type="button" class="btn btn-primary" id="logoutButton">LOG OUT</button> <!-- כפתור אישור התנתקות -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container px-0 mx-0" style="max-width: 100%;">
+        <!-- נגן אודיו -->
+        <div class="audio-player-container">
+           
+            <label id="file-label" for="audio-file-input"> UPLOAD MP3 FILE</label>
+            <input type="file" accept="audio/*" required id="audio-file-input">
+            <div id="waveform" class="w-100"></div>
+            <div class="audio-controls">
+                <button id="Play-Button">PLAY</button>
+                <button id="Pause-Button">PAUSE</button>
+            </div>
+        </div>
+        
+        <!-- בלוק תצוגת RX -->
+        <div id="rx-display-block">
+            <div style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #333;">
+                The state you sent through the buttons in decimal representation
+            </div>
+            <div id="rx-content">
+                <div style="margin-bottom: 8px;">
+                    <span style="font-weight: bold;">current number:</span> 
+                    <span style="background-color: #e9ecef; padding: 2px 6px; border-radius: 4px;" id="current-value-display">-</span>
+                </div>
+                <div style="font-size: 12px; margin-top: 5px;">
+                    <span>Previous numbers:</span> 
+                    <span style="color: #6c757d;" id="history-display">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <button id="add-to-sequence-btn">
+                Add the current state to the project<i class="bi bi-plus-circle"></i>
+            </button>
+        </div>
+        
+        <!-- כפתורי מצבים -->
+        
+        <div id="controls">
+            <!-- קבוצת כפתורים לטבעת הלדים -->
+            <div class="control-group">
+                <h4>RGB</h4>
+                <button class="control-button color-btn" data-type="COLOR" data-value="0">1</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="1">2</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="2">3</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="3">4</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="4">5</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="5">6</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="6">7</button>
+                <button class="control-button color-btn" data-type="COLOR" data-value="7">8</button>
+            </div>
+            <div class="control-group">
+                <h4>LAHAT</h4>
+                <button class="control-button lahat-btn" data-type="LAHAT" data-value="0">OFF</button>
+                <button class="control-button lahat-btn" data-type="LAHAT" data-value="1">LOW</button>
+                <button class="control-button lahat-btn" data-type="LAHAT" data-value="2">MID</button>
+                <button class="control-button lahat-btn" data-type="LAHAT" data-value="3">HIGH</button>
+            </div>
+            <div class="control-group">
+                <h4>LYZER</h4>
+                <button class="control-button sl-btn" data-type="SL" data-value="0">A</button>
+                <button class="control-button sl-btn" data-type="SL" data-value="1">B</button>
+                <button class="control-button sl-btn" data-type="SL" data-value="2">C</button>
+                <button class="control-button sl-btn" data-type="SL" data-value="3">D</button>
+            </div>
+            <div class="control-group">
+                <h4>LED</h4>
+                <button class="control-button leddata-btn" data-type="LEDDATA" data-value="0">OFF</button>
+                <button class="control-button leddata-btn" data-type="LEDDATA" data-value="1">ON</button>
+            </div>
+        </div>
+        
+        <!-- רצפי פעולות -->
+        <div class="mt-4">
+            <div id="controlPanels"></div>
+        </div>
+    </div>
+
+    <!-- טעינת ספריות JavaScript חיצוניות -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        // Firebase הגדרות
+        const firebaseConfig = {
+            apiKey: "AIzaSyBISujiHCOAhlhmXBvoq4U4usbFr7CDTwc",
+            authDomain: "tecnlogic-dance.firebaseapp.com",
+            projectId: "tecnlogic-dance",
+            storageBucket: "tecnlogic-dance.appspot.com",
+            messagingSenderId: "295263431339",
+            appId: "1:295263431339:web:0576ec5a6512cf7d9e25ee"
+        };
+
+        // אתחול Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // משתנים גלובליים
+        const sequences = {};
+        let lastSentValues = [];
+        const MAX_HISTORY = 20;
+
+        // ערכי כפתורי השליטה
+        let controlValues = {
+            COLOR: 0,
+            LAHAT: 0,
+            SL: 0,
+            LEDDATA: 0
+        };
+        
+        // נגן אודיו
+        const audioFileInput = document.getElementById('audio-file-input');
+        const waveformContainer = document.getElementById('waveform');
+        const wavesurfer = WaveSurfer.create({
+            container: waveformContainer,
+            waveColor: '#4F4A85',
+            progressColor: '#383351',
+            height: 100,
+            responsive: true,
+            barWidth: 2,
+            barGap: 3,
+            barRadius: 3,
+            cursorWidth: 1,
+            normalize: true
+        });
+
+        // טעינת קובץ אודיו - הסרת ההעלאה ל-Firebase
+        audioFileInput.addEventListener('change', () => {
+            const files = audioFileInput.files;
+            if (!files || !files[0]) return;
+
+            const file = files[0];
+            const fileUrl = URL.createObjectURL(file);
+            wavesurfer.load(fileUrl);
+        });
+
+        // כפתורי נגן/עצור
+        document.getElementById('Play-Button').addEventListener('click', () => wavesurfer.play());
+        document.getElementById('Pause-Button').addEventListener('click', () => wavesurfer.pause());
+        
+        // שמירת רצפים ב-localStorage
+        function saveSequencesToLocalStorage() {
+            const sequencesToSave = {};
+            Object.keys(sequences).forEach(key => {
+                sequencesToSave[key] = {
+                    name: sequences[key].name,
+                    numbers: sequences[key].numbers,
+                    interval: sequences[key].interval
+                };
+            });
+            
+            localStorage.setItem('dance_sequences', JSON.stringify(sequencesToSave));
+        }
+        
+        // טעינת רצפים מ-localStorage
+        function loadSequencesFromLocalStorage() {
+            const savedSequences = localStorage.getItem('dance_sequences');
+            if (savedSequences) {
+                try {
+                    const parsed = JSON.parse(savedSequences);
+                    
+                    Object.keys(parsed).forEach(key => {
+                        sequences[key] = {
+                            name: parsed[key].name,
+                            numbers: parsed[key].numbers,
+                            interval: parsed[key].interval || 1000,
+                            running: false,
+                            timer: null
+                        };
+                    });
+                } catch (error) {
+                    console.error('שגיאה בטעינת רצפים מהאחסון המקומי:', error);
+                }
+            }
+        }
+        
+        // יצירת רצף דוגמה
+        function createExampleSequence() {
+            if (Object.keys(sequences).length === 0) {
+                const exampleSequenceId = 'example_sequence';
+                sequences[exampleSequenceId] = {
+                    name: 'An example project',
+                    numbers: [62, 65, 126, 153, 190],
+                    interval: 1000,
+                    running: false,
+                    timer: null
+                };
+                
+                saveSequencesToLocalStorage();
+            }
+        }
+        
+        // יצירת רצף חדש
+        function createNewSequence() {
+            const nameInput = document.getElementById('new-sequence-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) return;
+            
+            const sequenceId = 'sequence_' + Date.now();
+            
+            sequences[sequenceId] = {
+                name: name,
+                numbers: [],
+                interval: 1000,
+                running: false,
+                timer: null
+            };
+            
+            saveSequencesToLocalStorage();
+            createSequencesUI();
+            nameInput.value = '';
+        }
+        
+        // מחיקת רצף
+        function deleteSequence(sequenceKey) {
+            if (sequences[sequenceKey].running) return;
+            
+            delete sequences[sequenceKey];
+            saveSequencesToLocalStorage();
+            createSequencesUI();
+        }
+        
+        // עדכון מהירות רצף
+        function updateSequenceSpeed(sequenceKey) {
+            const speedInput = document.getElementById(`${sequenceKey}-speed`);
+            const newSpeed = parseInt(speedInput.value);
+            
+            if (!isNaN(newSpeed) && newSpeed >= 100 && newSpeed <= 5000) {
+                sequences[sequenceKey].interval = newSpeed;
+                saveSequencesToLocalStorage();
+            } else {
+                speedInput.value = sequences[sequenceKey].interval;
+            }
+        }
+        
+        // ניקוי רצף
+        function clearSequence(sequenceKey) {
+            if (sequences[sequenceKey].running) return;
+            
+            sequences[sequenceKey].numbers = [];
+            saveSequencesToLocalStorage();
+            
+            const numbersDisplay = document.getElementById(`${sequenceKey}-numbers`);
+            if (numbersDisplay) {
+                numbersDisplay.textContent = '[]';
+            }
+        }
+        
+        // הוספת ערך לרצף
+        function addCurrentValueToSequence(sequenceKey) {
+            const currentValue = parseInt(document.getElementById('current-value-display').textContent);
+            
+            if (isNaN(currentValue)) return;
+            
+            sequences[sequenceKey].numbers.push(currentValue);
+            saveSequencesToLocalStorage();
+            
+            const numbersDisplay = document.getElementById(`${sequenceKey}-numbers`);
+            if (numbersDisplay) {
+                numbersDisplay.textContent = `[${sequences[sequenceKey].numbers.join(', ')}]`;
+            }
+        }
+        
+        // ייצוא רצפים
+        function exportSequences() {
+            const dataToExport = {};
+            
+            Object.keys(sequences).forEach(key => {
+                dataToExport[key] = {
+                    name: sequences[key].name,
+                    numbers: sequences[key].numbers,
+                    interval: sequences[key].interval
+                };
+            });
+            
+            const jsonData = JSON.stringify(dataToExport);
+            const base64Data = btoa(jsonData);
+            
+            const blob = new Blob([base64Data], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dance_sequences_${new Date().toISOString().slice(0,10)}.dat`;
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        }
+        
+        // ייבוא רצפים
+        function importSequences() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.dat';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const base64Data = event.target.result;
+                        const jsonData = atob(base64Data);
+                        const importedData = JSON.parse(jsonData);
+                        
+                        const importCount = Object.keys(importedData).length;
+                        
+                        if (importCount === 0) return;
+                        
+                        Object.keys(importedData).forEach(key => {
+                            const newKey = 'imported_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                            sequences[newKey] = {
+                                name: importedData[key].name,
+                                numbers: importedData[key].numbers,
+                                interval: importedData[key].interval || 1000,
+                                running: false,
+                                timer: null
+                            };
+                        });
+                        
+                        saveSequencesToLocalStorage();
+                        createSequencesUI();
+                    } catch (error) {
+                        console.error('שגיאה בייבוא הרצפים:', error);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // הפעלת רצף
+        function startSequence(sequenceKey) {
+            Object.keys(sequences).forEach(key => {
+                if (key !== sequenceKey && sequences[key].running) {
+                    stopSequence(key);
+                }
+            });
+            
+            const sequence = sequences[sequenceKey];
+            if (sequence.running || sequence.numbers.length === 0) return;
+
+            sequence.running = true;
+            let currentIndex = 0;
+            const display = document.getElementById(`${sequenceKey}-display`);
+            
+            updateButtons(sequenceKey, true);
+
+            function updateDisplay() {
+                const number = sequence.numbers[currentIndex];
+                display.textContent = `מספר נוכחי: ${number} (מיקום ${currentIndex + 1} מתוך ${sequence.numbers.length})`;
+                currentIndex = (currentIndex + 1) % sequence.numbers.length;
+                
+                firebase.database().ref('/RXTX/RX').set(number)
+                    .then(() => addToHistory(number))
+                    .catch(error => console.error('שגיאה בשליחה:', error));
+            }
+
+            updateDisplay();
+            sequence.timer = setInterval(updateDisplay, sequence.interval);
+        }
+
+        // עצירת רצף
+        function stopSequence(sequenceKey) {
+            const sequence = sequences[sequenceKey];
+            if (!sequence.running) return;
+
+            clearInterval(sequence.timer);
+            sequence.running = false;
+            
+            const display = document.getElementById(`${sequenceKey}-display`);
+            display.textContent = 'הרצת הפרוייקט ללא התערבות';
+            updateButtons(sequenceKey, false);
+        }
+
+        // עדכון כפתורים
+        function updateButtons(sequenceKey, running) {
+            const panel = document.getElementById(`${sequenceKey}-display`).parentElement;
+            const startBtn = panel.querySelector('.start-btn');
+            const stopBtn = panel.querySelector('.stop-btn');
+            
+            startBtn.disabled = running;
+            stopBtn.disabled = !running;
+            
+            if (running) {
+                startBtn.classList.add('disabled');
+                stopBtn.classList.remove('disabled');
+            } else {
+                startBtn.classList.remove('disabled');
+                stopBtn.classList.add('disabled');
+            }
+        }
+        
+        // יצירת ממשק רצפים
+        function createSequencesUI() {
+            const container = document.getElementById('controlPanels');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            createNewSequencePanel(container);
+            
+            Object.keys(sequences).forEach(key => {
+                createSequencePanel(container, key, sequences[key]);
+            });
+        }
+        
+        // יצירת פאנל רצף חדש
+        function createNewSequencePanel(container) {
+            const newSequencePanel = document.createElement('div');
+            newSequencePanel.className = 'control-panel new-sequence-panel mb-4';
+            
+            const newSequenceTitle = document.createElement('h3');
+            newSequenceTitle.className = 'h5 mb-3';
+            newSequenceTitle.textContent = 'Create a new project ';
+            newSequencePanel.appendChild(newSequenceTitle);
+            
+            const inputDiv = document.createElement('div');
+            inputDiv.className = 'mb-3';
+            
+            const inputLabel = document.createElement('label');
+            inputLabel.className = 'form-label';
+            inputLabel.setAttribute('for', 'new-sequence-name');
+            inputLabel.textContent = 'The name of the project:';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'new-sequence-name';
+            input.className = 'form-control';
+            input.placeholder = 'NAME';
+            
+            inputDiv.appendChild(inputLabel);
+            inputDiv.appendChild(input);
+            newSequencePanel.appendChild(inputDiv);
+            
+            const createBtn = document.createElement('button');
+            createBtn.textContent = 'Create a new project';
+            createBtn.onclick = createNewSequence;
+            
+            newSequencePanel.appendChild(createBtn);
+            container.appendChild(newSequencePanel);
+        }
+        
+        // יצירת פאנל רצף קיים
+        function createSequencePanel(container, key, sequence) {
+            const panel = document.createElement('div');
+            panel.className = 'control-panel';
+            panel.id = `sequence-panel-${key}`;
+            
+            // כותרת הרצף
+            const titleContainer = document.createElement('h3');
+            titleContainer.className = 'h5 mb-3';
+            titleContainer.textContent = sequence.name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'X';
+            deleteBtn.style.float = 'left';
+            deleteBtn.onclick = function() { deleteSequence(key); };
+            
+            titleContainer.appendChild(deleteBtn);
+            panel.appendChild(titleContainer);
+            
+            // מידע על הרצף
+            const numbersContainer = document.createElement('div');
+            numbersContainer.textContent = 'states in decimal ';
+            
+            const numbersSpan = document.createElement('span');
+            numbersSpan.id = `${key}-numbers`;
+            numbersSpan.textContent = `[${sequence.numbers.join(', ')}]`;
+            
+            numbersContainer.appendChild(numbersSpan);
+            panel.appendChild(numbersContainer);
+            
+            // תצוגת מצב
+            const display = document.createElement('div');
+            display.className = 'display';
+            display.id = `${key}-display`;
+            display.textContent = 'ready to go';
+            panel.appendChild(display);
+            
+            // כפתור הוספת ערך
+            const addValueBtn = document.createElement('button');
+            addValueBtn.textContent = 'add current state';
+            addValueBtn.onclick = function() { addCurrentValueToSequence(key); };
+            panel.appendChild(addValueBtn);
+            
+            // שינוי מהירות
+            const speedDiv = document.createElement('div');
+            speedDiv.style.margin = '10px 0';
+            
+            const speedLabel = document.createElement('span');
+            speedLabel.textContent = 'SPEED ';
+            
+            const speedInput = document.createElement('input');
+            speedInput.type = 'number';
+            speedInput.id = `${key}-speed`;
+            speedInput.value = sequence.interval;
+            speedInput.min = '100';
+            speedInput.max = '5000';
+            speedInput.step = '100';
+            speedInput.style.width = '80px';
+            
+            const updateSpeedBtn = document.createElement('button');
+            updateSpeedBtn.textContent = 'Update';
+            updateSpeedBtn.style.marginLeft = '10px';
+            updateSpeedBtn.onclick = function() { updateSequenceSpeed(key); };
+            
+            speedDiv.appendChild(speedLabel);
+            speedDiv.appendChild(speedInput);
+            speedDiv.appendChild(updateSpeedBtn);
+            panel.appendChild(speedDiv);
+            
+            // כפתורי שליטה
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'button-group';
+            
+            const startBtn = document.createElement('button');
+            startBtn.className = 'start-btn';
+            startBtn.textContent = 'RUN';
+            startBtn.onclick = function() { startSequence(key); };
+            
+            const stopBtn = document.createElement('button');
+            stopBtn.className = 'stop-btn';
+            stopBtn.textContent = 'STOP';
+            stopBtn.disabled = true;
+            stopBtn.onclick = function() { stopSequence(key); };
+            
+            const clearBtn = document.createElement('button');
+            clearBtn.textContent = 'Delete all states';
+            clearBtn.onclick = function() { clearSequence(key); };
+            
+            buttonGroup.appendChild(startBtn);
+            buttonGroup.appendChild(stopBtn);
+            buttonGroup.appendChild(clearBtn);
+            panel.appendChild(buttonGroup);
+            
+            container.appendChild(panel);
+        }
+        
+        // הוספת ערך להיסטוריה
+        function addToHistory(value) {
+            if (lastSentValues.length === 0 || lastSentValues[lastSentValues.length - 1] !== value) {
+                if (lastSentValues.length >= MAX_HISTORY) {
+                    lastSentValues.shift();
+                }
+                lastSentValues.push(value);
+                updateHistoryDisplay();
+            }
+        }
+        
+        // עדכון תצוגת היסטוריה
+        function updateHistoryDisplay() {
+            const historyElement = document.getElementById('history-display');
+            if (historyElement) {
+                historyElement.textContent = lastSentValues.slice(-5).join(', ');
+            }
+        }
+        
+        // עדכון תצוגת RX
+        function updateRXDisplay(value) {
+            updateCurrentValueDisplay(value);
+            
+            if (value !== null && value !== undefined) {
+                if (lastSentValues.length === 0 || lastSentValues[lastSentValues.length - 1] !== value) {
+                    addToHistory(value);
+                }
+            }
+        }
+        
+        // עדכון ערך נוכחי
+        function updateCurrentValueDisplay(value) {
+            const currentValueDisplay = document.getElementById('current-value-display');
+            if (currentValueDisplay) {
+                currentValueDisplay.textContent = value;
+            }
+        }
+
+        // האזנה לשינויים ב-RX
+        function listenToRXChanges() {
+            const rxRef = firebase.database().ref('/RXTX/RX');
+            
+            rxRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                updateRXDisplay(data);
+                
+                if (data !== null && data !== undefined) {
+                    if (lastSentValues.length === 0 || lastSentValues[lastSentValues.length - 1] !== data) {
+                        addToHistory(data);
+                    }
+                }
+            }, (error) => {
+                console.error('Error fetching RX data:', error);
+                const rxContent = document.getElementById('rx-content');
+                if (rxContent) {
+                    rxContent.innerHTML = '<span style="color: red;">שגיאה בטעינת נתונים</span>';
+                }
+            });
+        }
+        
+        // הוספת האזנה לכפתורי המצבים
+        function setupControlButtons() {
+            document.querySelectorAll('.control-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const value = parseInt(this.dataset.value);
+                    
+                    controlValues[type] = value;
+                    
+                    document.querySelectorAll(`.${type.toLowerCase()}-btn`).forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    calculateAndSendToRX();
+                });
+            });
+        }
+        
+        // חישוב ושליחת ערך ל-RX
+        function calculateAndSendToRX() {
+            const result = (controlValues.COLOR * 32) + 
+                        (controlValues.LAHAT * 8) + 
+                        (controlValues.SL * 2) + 
+                        controlValues.LEDDATA;
+            
+            firebase.database().ref('/RXTX/RX').set(result)
+                .then(() => {
+                    addToHistory(result);
+                    updateCurrentValueDisplay(result);
+                })
+                .catch((error) => console.error('Error sending to Firebase:', error));
+            
+            return result;
+        }
+        
+        // הוספת האזנה לכפתור הוספת ערך לרצף
+        function setupAddToSequenceBtn() {
+            const addBtn = document.getElementById('add-to-sequence-btn');
+            if (!addBtn) return;
+            
+            addBtn.addEventListener('click', function() {
+                const currentValue = parseInt(document.getElementById('current-value-display').textContent);
+                if (isNaN(currentValue)) return;
+                
+                const sequenceKeys = Object.keys(sequences);
+                if (sequenceKeys.length === 0) {
+                    const newSequencePanel = document.querySelector('.new-sequence-panel');
+                    if (newSequencePanel) {
+                        newSequencePanel.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    return;
+                }
+                
+                // בחירת הרצף הראשון כברירת מחדל
+                addCurrentValueToSequence(sequenceKeys[0]);
+            });
+        }
+        
+        window.onload = displayUserEmail();
+
+        // פונקציה להצגת המייל המחובר
+        function displayUserEmail() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // אם יש משתמש מחובר, הצג את המייל שלו בכפתור
+                    document.getElementById("userEmail").textContent = `Logged in as: ${user.email}`;
+                    console.log(user); // הצגת אובייקט המשתמש בקונסול
+                } else {
+                    // אם אין משתמש מחובר, הצג הודעה מתאימה
+                    document.getElementById("userEmail").textContent = "Not logged in";
+                    console.log(user); // הצגת null בקונסול
+                }
+            });
+        }
+    
+        // פונקציה לניתוק המשתמש שמאזינה ללחיצה על כפתור ההתנתקות
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                // לאחר התנתקות מוצלחת, מעבר לדף ההתחברות
+                window.location.href = "/APPHTML/index.html";
+            }).catch((error) => {
+                // טיפול בשגיאה בהתנתקות
+                console.error("Error signing out:", error);
+            });
+        });
+        
+        // אתחול המערכת
+        window.onload = function() {
+            loadSequencesFromLocalStorage();
+            createExampleSequence();
+            displayUserEmail();
+            createSequencesUI();
+            setupControlButtons();
+            listenToRXChanges();
+            setupAddToSequenceBtn();
+            
+            // הפיכת הפונקציות לגלובליות
+            window.startSequence = startSequence;
+            window.stopSequence = stopSequence;
+            window.updateSequenceSpeed = updateSequenceSpeed;
+            window.clearSequence = clearSequence;
+            window.createNewSequence = createNewSequence;
+            window.deleteSequence = deleteSequence;
+            window.addCurrentValueToSequence = addCurrentValueToSequence;
+            window.exportSequences = exportSequences;
+            window.importSequences = importSequences;
+        };
+    </script>
+</body>
+</html>
